@@ -1,0 +1,94 @@
+app "Roblox"
+theme dark
+accent #3b82f6
+
+state plats = [[0,300,300,60,0],[355,300,100,60,0],[510,270,100,90,0],[665,240,100,120,0],[820,240,100,120,2],[975,260,100,20,0],[1130,230,100,20,0],[1285,200,100,20,0],[1440,230,100,20,0],[1595,260,100,20,0],[1750,260,100,100,2],[1905,280,400,80,0],[2005,260,40,20,1],[2125,260,40,20,1],[2360,240,100,120,0],[2515,190,100,170,0],[2670,140,100,220,0],[2825,140,160,220,3]]
+state px = 40
+state py = 265.9
+state vx = 0
+state vy = 0
+state ground = false
+state cam = 0
+state spawnX = 40
+state spawnY = 265.9
+state deaths = 0
+state time = 0
+state stage = 1
+state mode = "play"
+state winAt = 0
+
+fn reset()
+  px = 40; py = 265.9; vx = 0; vy = 0; spawnX = 40; spawnY = 265.9; deaths = 0; time = 0; stage = 1; cam = 0; mode = "play";
+
+fn die()
+  deaths += 1; px = spawnX; py = spawnY; vx = 0; vy = 0;
+
+fn say(s, size, xx, yy, al)
+  ctx.textAlign = al; ctx.font = "bold " + size + "px system-ui";
+  ctx.strokeText(s, xx, yy); ctx.fillText(s, xx, yy);
+
+fn phys(d)
+  const pw = 22, ph = 34;
+  const hit = (p, m) => px < p[0] + p[2] && px + pw > p[0] && py < p[1] + p[3] && py + ph > p[1] + m;
+  const left = keys.ArrowLeft || keys.KeyA, right = keys.ArrowRight || keys.KeyD, jump = keys.Space || keys.ArrowUp || keys.KeyW;
+  vx = ((right ? 1 : 0) - (left ? 1 : 0)) * 200;
+  if (jump && ground) { vy = -520; ground = false; }
+  vy = Math.min(vy + 1500 * d, 800);
+  px += vx * d;
+  if (vx != 0) for (const p of plats) if (p[4] != 1 && hit(p, 1)) px = vx > 0 ? p[0] - pw : p[0] + p[2];
+  py += vy * d; ground = false;
+  for (const p of plats) if (p[4] != 1 && hit(p, 0)) {
+    if (vy > 0) {
+      py = p[1] - ph - 0.01; ground = true;
+      if (p[4] == 2 && spawnX != p[0] + p[2] / 2 - pw / 2) { spawnX = p[0] + p[2] / 2 - pw / 2; spawnY = py; stage += 1; }
+      if (p[4] == 3) { mode = "win"; winAt = Date.now(); }
+    } else if (vy < 0) py = p[1] + p[3];
+    vy = 0;
+  }
+  for (const p of plats) if (p[4] == 1 && hit(p, 0)) die();
+  if (py > H + 60) die();
+  px = Math.max(0, px);
+
+loop
+  if (mode == "play") { time += dt; phys(dt / 3); phys(dt / 3); phys(dt / 3); }
+  else if (keys.Space && Date.now() - winAt > 700) reset();
+  cam += (Math.max(0, Math.min(px - W / 2 + 11, 3000 - W)) - cam) * Math.min(1, dt * 8);
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, "#5aa9ff"); g.addColorStop(1, "#cfe8ff");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = "rgba(255,255,255,.7)";
+  for (let i = 0; i < 6; i++) { const cx = (((i * 260 - cam * 0.3) % (W + 200)) + W + 200) % (W + 200) - 100; ctx.fillRect(cx, 50 + (i % 3) * 40, 90, 22); ctx.fillRect(cx + 20, 36 + (i % 3) * 40, 50, 16); }
+  ctx.fillStyle = "#ff5a1f"; ctx.fillRect(0, H - 14, W, 14);
+  ctx.fillStyle = "#ffb020"; for (let x = 0; x < W; x += 24) ctx.fillRect(x, H - 14 + Math.sin(Date.now() / 200 + x) * 2, 14, 4);
+  for (const p of plats) {
+    const x = p[0] - cam, kind = p[4];
+    if (x > W || x + p[2] < 0) continue;
+    ctx.fillStyle = kind == 1 ? "#ef4444" : kind == 2 ? "#22c55e" : kind == 3 ? "#facc15" : "#9ca3af";
+    ctx.fillRect(x, p[1], p[2], p[3]);
+    if (kind == 1) { ctx.fillStyle = "#fecaca"; for (let sx = x; sx < x + p[2]; sx += 10) { ctx.beginPath(); ctx.moveTo(sx, p[1] + p[3]); ctx.lineTo(sx + 5, p[1]); ctx.lineTo(sx + 10, p[1] + p[3]); ctx.fill(); } continue; }
+    ctx.fillStyle = "rgba(255,255,255,.3)"; ctx.fillRect(x, p[1], p[2], 5);
+    ctx.fillStyle = "rgba(0,0,0,.15)"; for (let sx = x + 8; sx < x + p[2] - 6; sx += 20) ctx.fillRect(sx, p[1] + 10, 8, 4);
+    if (kind > 1) { ctx.fillStyle = "#fff"; ctx.fillRect(x + p[2] / 2, p[1] - 40, 3, 40); ctx.fillStyle = kind == 3 ? "#ef4444" : "#16a34a"; ctx.fillRect(x + p[2] / 2 + 3, p[1] - 40, 20, 12); }
+  }
+  const sx = px - cam, sw = ground && vx != 0 ? Math.sin(px / 6) * 3 : 0;
+  ctx.fillStyle = "#22c55e"; ctx.fillRect(sx + 2 + sw, py + 24, 8, 10); ctx.fillRect(sx + 12 - sw, py + 24, 8, 10);
+  ctx.fillStyle = "#3b82f6"; ctx.fillRect(sx + 1, py + 12, 20, 12);
+  ctx.fillStyle = "#facc15"; ctx.fillRect(sx - 3, py + 12, 4, 12); ctx.fillRect(sx + 21, py + 12, 4, 12); ctx.fillRect(sx + 4, py, 14, 12);
+  ctx.fillStyle = "#111"; ctx.fillRect(sx + 7, py + 4, 2, 3); ctx.fillRect(sx + 13, py + 4, 2, 3); ctx.fillRect(sx + 8, py + 9, 6, 1);
+  ctx.fillStyle = "#fff"; ctx.strokeStyle = "#111"; ctx.lineWidth = 4; ctx.lineJoin = "round";
+  say("Stage " + stage + " / 3", 16, 10, 24, "left");
+  say("Deaths " + deaths, 16, W - 10, 24, "right");
+  if (mode == "win") {
+    ctx.fillStyle = "rgba(0,0,0,.55)"; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "#fff"; ctx.strokeStyle = "#111";
+    say("You win!", 48, W / 2, H / 2 - 20, "center");
+    say(time.toFixed(1) + "s · " + deaths + " deaths", 22, W / 2, H / 2 + 20, "center");
+    say("Tap or press Space to play again", 16, W / 2, H / 2 + 54, "center");
+  }
+
+page
+  column
+    title "Roblox" align=center
+    canvas w=640 h=360
+    text "Time: {time.toFixed(1)}s" align=center
+    text "Move: ← → / A D · Jump: Space / W · Touch: left, middle and right of the game" align=center size=14
