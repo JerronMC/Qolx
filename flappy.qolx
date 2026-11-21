@@ -1,0 +1,77 @@
+app "Flappy Qolx"
+theme dark
+accent #f59e0b
+
+state y = 250
+state vy = 0
+state score = 0
+state best = (function(){ try { return +localStorage.getItem("qolx-flappy") || 0 } catch (e) { return 0 } })()
+state mode = "ready"
+state pipes = []
+state spawn = 0
+state gx = 0
+state deadAt = 0
+
+fn reset()
+  y = 250; vy = 0; score = 0; pipes = []; spawn = 0; mode = "ready";
+
+fn flap()
+  if (mode == "over") { if (Date.now() - deadAt > 450) reset(); return; }
+  if (mode == "ready") { mode = "play"; spawn = 0; }
+  vy = -310;
+
+fn die()
+  if (mode != "play") return;
+  mode = "over"; deadAt = Date.now();
+  if (score > best) { best = score; try { localStorage.setItem("qolx-flappy", best) } catch (e) {} }
+
+fn say(s, size, yy)
+  ctx.font = "bold " + size + "px system-ui";
+  ctx.strokeText(s, W / 2, yy); ctx.fillText(s, W / 2, yy);
+
+loop
+  const gh = 70, bx = 90, br = 14, pw = 56, gap = 150;
+  if (mode == "ready") y = 250 + Math.sin(Date.now() / 250) * 8;
+  if (mode == "play") {
+    vy += 950 * dt; y += vy * dt; gx = (gx + 150 * dt) % 24; spawn -= dt;
+    if (spawn <= 0) { spawn = 1.45; pipes.push({ x: W + 10, top: 70 + Math.random() * (H - gh - gap - 140), done: false }); }
+    for (const p of pipes) {
+      p.x -= 150 * dt;
+      if (!p.done && p.x + pw < bx) { p.done = true; score += 1; }
+      if (bx + br > p.x && bx - br < p.x + pw && (y - br < p.top || y + br > p.top + gap)) die();
+    }
+    pipes = pipes.filter(p => p.x > -pw - 10);
+    if (y + br > H - gh || y - br < 0) die();
+  }
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, "#4ec0ca"); g.addColorStop(1, "#c8f0f4");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = "rgba(255,255,255,.65)";
+  for (let i = 0; i < 3; i++) { const cx = (i * 170 + 400 - Date.now() / 60) % (W + 120) - 60; ctx.beginPath(); ctx.ellipse(cx, 120 + i * 70, 44, 16, 0, 0, 7); ctx.fill(); }
+  for (const p of pipes) {
+    ctx.fillStyle = "#5ec43a"; ctx.fillRect(p.x, 0, pw, p.top); ctx.fillRect(p.x, p.top + gap, pw, H);
+    ctx.fillStyle = "#3d9a22"; ctx.fillRect(p.x - 4, p.top - 22, pw + 8, 22); ctx.fillRect(p.x - 4, p.top + gap, pw + 8, 22);
+  }
+  ctx.fillStyle = "#ded895"; ctx.fillRect(0, H - gh, W, gh);
+  ctx.fillStyle = "#73bf2e"; ctx.fillRect(0, H - gh, W, 12);
+  ctx.fillStyle = "#c9c27a"; for (let x = -gx; x < W; x += 24) ctx.fillRect(x, H - gh + 12, 12, 6);
+  ctx.save(); ctx.translate(bx, y); ctx.rotate(Math.max(-0.4, Math.min(1.2, vy / 500)));
+  ctx.fillStyle = "#fbbf24"; ctx.beginPath(); ctx.arc(0, 0, br, 0, 7); ctx.fill();
+  ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(6, -4, 5, 0, 7); ctx.fill();
+  ctx.fillStyle = "#111"; ctx.beginPath(); ctx.arc(8, -4, 2, 0, 7); ctx.fill();
+  ctx.fillStyle = "#f97316"; ctx.fillRect(10, 2, 11, 5);
+  ctx.fillStyle = "#f59e0b"; ctx.beginPath(); ctx.ellipse(-4, 4, 7, 4, 0, 0, 7); ctx.fill();
+  ctx.restore();
+  ctx.textAlign = "center"; ctx.fillStyle = "#fff"; ctx.strokeStyle = "#1a1a1a"; ctx.lineWidth = 5; ctx.lineJoin = "round";
+  say(score, 44, 80);
+  if (mode == "ready") say("Tap or press Space", 22, H / 2 + 60);
+  if (mode == "over") { say("Game Over", 40, H / 2 - 10); say("Tap to retry", 22, H / 2 + 30); }
+
+key Space -> flap()
+key ArrowUp -> flap()
+
+page
+  column
+    title "Flappy Qolx" align=center
+    canvas w=360 h=560 -> flap()
+    text "Best: {best}" align=center

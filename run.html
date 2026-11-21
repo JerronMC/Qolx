@@ -1,0 +1,5 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Qolx</title><style>body{font-family:system-ui;background:#0b0b12;color:#ecebff;padding:24px}</style></head><body><p id="m">Loading .qolx…</p>
+<script src="qolx.js"></script><script>
+const f=new URLSearchParams(location.search).get('file')||'hello.qolx';
+fetch(f).then(r=>{if(!r.ok)throw new Error(r.status+' '+f);return r.text()}).then(s=>{const h=Qolx.compile(s);document.open();document.write(h);document.close()}).catch(e=>{document.getElementById('m').textContent='Could not open '+f+': '+e.message});
+</script></body></html>

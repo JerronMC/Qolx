@@ -1,0 +1,69 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="favicon.svg"><link rel="stylesheet" href="style.css"><title>Qolx – Build apps for every screen from one tiny file</title><meta name="description" content="Qolx is a small, readable language that compiles to fast web apps and packages them for Android, iOS, Windows, macOS and Linux."></head><body>
+<nav><div class="wrap nav"><a class="brand" href="index.html"><img src="logo.svg" alt="Qolx logo">Qolx</a><button class="burger" id="burger" aria-label="Menu"><i data-i="menu"></i></button><div class="links" id="links"><a href="index.html#features">Features</a><a href="index.html#docs">Docs</a><a href="index.html#platforms">Platforms</a><a href="playground.html">Playground</a><a href="build.html">Create App</a><a class="btn p" href="playground.html"><i data-i="play"></i>Try Qolx</a></div></div></nav>
+<main class="wrap">
+<div class="hero"><div><span class="pill">v0.1 · open source · .qolx</span><h1>Build apps for every screen from <span class="g">one tiny file</span>.</h1><p class="lead">Qolx is a small, readable language for beginners and pros. Write a .qolx file, run it in the browser, then package it for web, Android, iOS, Windows, macOS and Linux.</p><div class="cta"><a class="btn p" href="playground.html"><i data-i="play"></i>Open Playground</a><a class="btn" href="build.html"><i data-i="box"></i>Create App</a><a class="btn" href="run.html?file=hello.qolx"><i data-i="code"></i>Open .qolx site</a><a class="btn" href="run.html?file=flappy.qolx"><i data-i="play"></i>Play Flappy</a></div></div>
+<div class="win demo"><div class="bar"><i class="d"></i><i class="d"></i><i class="d"></i><span>counter.qolx → live</span></div><pre id="hc">app "Counter"
+state count = 0
+
+page
+  card
+    title "Qolx Counter"
+    text "Clicked {count} times"
+    button "+1" -> count += 1</pre><iframe id="heroFrame" title="Live Qolx demo" sandbox="allow-scripts"></iframe></div></div>
+
+<section id="features"><h2>Why Qolx</h2><p class="sub">Less code to say the same thing. Every feature below works in this release.</p><div class="grid">
+<div class="card"><i data-i="smile"></i><h3>Easy to read</h3><p>Indentation-based, plain words. <code>button "Add" -> count += 1</code> does what it says.</p></div>
+<div class="card"><i data-i="zap"></i><h3>Fast and tiny</h3><p>Compiles to one static HTML file with a ~1 KB reactive runtime. No framework, no build step.</p></div>
+<div class="card"><i data-i="layers"></i><h3>Beginners and pros</h3><p>Start with six words. Drop into real JavaScript expressions, functions and custom CSS when you need power.</p></div>
+<div class="card"><i data-i="code"></i><h3>The .qolx format</h3><p>One file is an app. Open it in a browser with <code>run.html</code> just like opening an HTML page.</p></div>
+<div class="card"><i data-i="box"></i><h3>Projects</h3><p>A <code>qolx.json</code> describes name, version, entry file and targets. The Create App tool writes it for you.</p></div>
+<div class="card"><i data-i="phone"></i><h3>Mobile and desktop UI</h3><p>Responsive layouts and a light or dark theme come built in. Same file on phone, tablet and desktop.</p></div></div></section>
+
+<section id="compare"><h2>Same app, less code</h2><p class="sub">A counter in plain HTML + JavaScript versus Qolx.</p><div class="two">
+<div class="win"><div class="bar"><span>index.html</span></div><pre>&lt;div id="app"&gt;
+  &lt;h1&gt;Counter&lt;/h1&gt;
+  &lt;p&gt;Clicked &lt;span id="n"&gt;0&lt;/span&gt; times&lt;/p&gt;
+  &lt;button id="b"&gt;+1&lt;/button&gt;
+&lt;/div&gt;
+&lt;script&gt;
+  let count = 0;
+  const n = document.getElementById("n");
+  document.getElementById("b")
+    .addEventListener("click", () =&gt; {
+      count++; n.textContent = count;
+    });
+&lt;/script&gt;</pre></div>
+<div class="win"><div class="bar"><span>counter.qolx</span></div><pre>state count = 0
+
+page
+  title "Counter"
+  text "Clicked {count} times"
+  button "+1" -&gt; count += 1</pre></div></div></section>
+
+<section id="docs"><h2>Language reference</h2><p class="sub">Lines nest by indentation (2 spaces). <code>{expr}</code> inside text is live. <code>-&gt;</code> runs code on click.</p><div class="win scroll"><table class="tbl"><tr><th>Word</th><th>Example</th><th>What it does</th></tr>
+<tr><td><code>app</code></td><td><code>app "My App"</code></td><td>Sets the app title</td></tr>
+<tr><td><code>theme</code> / <code>accent</code></td><td><code>theme light</code> · <code>accent #10b981</code></td><td>Light or dark, and the main color</td></tr>
+<tr><td><code>state</code></td><td><code>state count = 0</code></td><td>A reactive value. The screen updates when it changes</td></tr>
+<tr><td><code>fn</code></td><td><code>fn reset = count = 0</code></td><td>Reusable action. Call it with <code>reset()</code></td></tr>
+<tr><td><code>page</code>, <code>card</code>, <code>row</code>, <code>column</code>, <code>grid</code></td><td><code>grid cols=3 gap=12</code></td><td>Layout containers</td></tr>
+<tr><td><code>title</code>, <code>heading</code>, <code>text</code></td><td><code>text "Hi {name}"</code></td><td>Text, with live values</td></tr>
+<tr><td><code>button</code></td><td><code>button "Add" -&gt; n += 1</code></td><td>Runs the code after <code>-&gt;</code> when clicked</td></tr>
+<tr><td><code>input</code>, <code>checkbox</code></td><td><code>input name hint="Your name"</code></td><td>Two-way bound to a state value</td></tr>
+<tr><td><code>if</code></td><td><code>if count &gt; 5</code></td><td>Shows its children only when true</td></tr>
+<tr><td><code>image</code>, <code>link</code>, <code>divider</code>, <code>space</code></td><td><code>link "Docs" to="/docs"</code></td><td>Media, navigation and spacing</td></tr>
+<tr><td><code>canvas</code>, <code>loop</code>, <code>key</code></td><td><code>canvas w=360 h=560 -&gt; flap()</code></td><td>Games: a canvas (<code>ctx</code>, <code>W</code>, <code>H</code> are ready), a <code>loop</code> block run every frame with <code>dt</code>, and <code>key Space -&gt; fn()</code>. Multi-line <code>fn name(args)</code> blocks are indented code</td></tr><tr><td><code>style</code></td><td><code>style .q-btn{border-radius:99px}</code></td><td>Raw CSS escape hatch</td></tr>
+<tr><td>Props</td><td><code>gap= pad= width= color= bg= size= radius= align=</code></td><td>Quick styling on any element</td></tr></table></div></section>
+
+<section id="platforms"><h2>One source, every platform</h2><p class="sub">The Create App tool generates ready-to-build projects for each target.</p><div class="plat">
+<div class="card"><i data-i="phone"></i><b>Android</b><small>APK via Capacitor</small></div><div class="card"><i data-i="phone"></i><b>iOS</b><small>Xcode via Capacitor</small></div>
+<div class="card"><i data-i="monitor"></i><b>Windows</b><small>EXE installer</small></div><div class="card"><i data-i="monitor"></i><b>macOS</b><small>DMG</small></div>
+<div class="card"><i data-i="monitor"></i><b>Linux</b><small>AppImage</small></div><div class="card"><i data-i="download"></i><b>Web / PWA</b><small>Installable</small></div></div>
+<p class="note">Native packages are built with each platform's standard toolchain (Android Studio, Xcode, Electron). Qolx generates the complete project and the exact commands.</p></section>
+
+<section id="start"><h2>Get started</h2><div class="steps" style="margin-top:24px">
+<div class="card"><h3>Write</h3><p>Open the <a href="playground.html" class="g">Playground</a> and edit a .qolx file. It compiles as you type.</p></div>
+<div class="card"><h3>Open</h3><p>Host your .qolx file anywhere and visit <code>run.html?file=your.qolx</code> to open it like a web page.</p></div>
+<div class="card"><h3>Ship</h3><p>Use <a href="build.html" class="g">Create App</a> to download a project zip for Android, iOS, Windows, macOS, Linux or the web.</p></div></div></section>
+</main>
+<footer><div class="wrap foot"><span>© 2026 Qolx · MIT License</span><span>Write once. Run everywhere.</span></div></footer>
+<script src="icons.js"></script><script src="qolx.js"></script><script src="examples.js"></script><script src="app.js"></script></body></html>

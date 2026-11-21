@@ -1,0 +1,16 @@
+app "Counter"
+theme dark
+accent #7c5cff
+state count = 0
+fn reset = count = 0
+
+page
+  card pad=24
+    title "Qolx Counter"
+    text "You clicked {count} times"
+    row
+      button "+1" -> count += 1
+      button "-1" -> count -= 1
+      button "Reset" -> reset()
+    if count >= 10
+      text "🔥 Double digits!"

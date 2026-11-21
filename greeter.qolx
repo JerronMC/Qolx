@@ -1,0 +1,11 @@
+app "Greeter"
+theme light
+accent #0ea5e9
+state name = ""
+
+page
+  card
+    title "Hello, {name || 'friend'}!"
+    input name hint="Type your name"
+    if name
+      text "Nice to meet you 👋"
